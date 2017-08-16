@@ -10,27 +10,36 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class ExcelUtil {
 
+
 	/**
-	 * 将一个excel转换为List格式
+	 *
+	 * @param input excel 文件的inputStream
+	 * @param keyMapping
+	 * @return List<Map<String, Object>>
+	 * @throws IOException
+     */
+	public static List<Map<String, Object>> excelToList(InputStream input,
+														Map<String, String> keyMapping) throws IOException{
+		return excelToList(input, keyMapping, 0);
+	}
+
+	/**
+	 * 将一个excel转换为List格式,默认获取第一个sheet
 	 * 
 	 * @param input
-	 * @return
+	 * @return List<Map<String, Object>>
 	 * @throws IOException
 	 */
 	public static List<Map<String, Object>> excelToList(InputStream input,
-			Map<String, String> keyMapping) throws IOException {
+			Map<String, String> keyMapping, int sheetIndex) throws IOException {
 		XSSFWorkbook book = new XSSFWorkbook(input);
-		XSSFSheet sheet = book.getSheetAt(0);
+		XSSFSheet sheet = book.getSheetAt(sheetIndex);
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 		int rownum = sheet.getLastRowNum();
-
 		// 第一行，标题行
 		XSSFRow firstRow = sheet.getRow(0);
 		int cellNum = firstRow.getLastCellNum();
@@ -56,10 +65,10 @@ public class ExcelUtil {
 				continue;
 			}
 			cellNum = row.getLastCellNum();
-			Map<String, Object> record = new TreeMap<String, Object>();
+			Map<String, Object> record = new LinkedHashMap<String, Object>();
 			for (int j = 0; j < cellNum; j++) {
 				XSSFCell cell = row.getCell(j);
-				if (cell != null) {
+				if (cell != null && StringUtil.isNotEmpty(keys[j])) {
 					record.put(keys[j], cell.toString());
 				}
 			}
@@ -73,6 +82,12 @@ public class ExcelUtil {
 		return excelToList(input, null);
 	}
 
+	/**
+	 * 将一个List<Map<String, Object>> 格式的数据转换为excel
+	 * @param list
+	 * @return
+	 * @throws IOException
+     */
 	public static XSSFWorkbook listToExcel(List<Map<String, Object>> list)
 			throws IOException {
 		Map<String, Object> firstRecord = list.get(0);

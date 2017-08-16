@@ -25,6 +25,7 @@ public class ExcelUtilTest {
             assertTrue(item.containsKey("field3"));
             assertTrue(item.containsKey("field4"));
             assertTrue(item.containsKey("field5"));
+            assertFalse(item.containsKey(""));
         }
         assertEquals("abc", result.get(0).get("field1"));
     }
